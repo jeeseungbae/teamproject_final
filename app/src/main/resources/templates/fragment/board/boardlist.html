@@ -41,7 +41,7 @@
                    aria-describedby="nicknameHelp" required minlength="1">
             <button type="submit" class="btn_srch">검색</button>
         </a>
-        <a type="button" class="btn btn-primary write" th:href="@{/board/form(categoryid=${findid.category.id},name=write)}">쓰기</a>
+        <a type="button" class="btn btn-primary write" th:href="@{/board/form/write(categoryid=${findid.category.id})}">쓰기</a>
     </form>
     </div>
 

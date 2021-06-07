@@ -1,7 +1,7 @@
 package com.finalproject.shelter.presentation.controller.restApi.userApi;
 
+import com.finalproject.shelter.business.service.logic.AccountLogicService;
 import com.finalproject.shelter.domain.model.entity.userDomain.Account;
-import com.finalproject.shelter.domain.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,39 +9,33 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-//@Slf4j
 class UserApiController {
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountLogicService accountLogicService;
 
     @GetMapping("/users")
     List<Account> all() {
-        return accountRepository.findAll();
+        return accountLogicService.findAll();
     }
 
     @PostMapping("/Accounts")
     Account newAccount(@RequestBody Account account) {
-        return accountRepository.save(account);
+        return accountLogicService.save(account);
     }
 
     @GetMapping("/Accounts/{id}")
     Account findById(@PathVariable Long id) {
-        return accountRepository.findById(id).orElse(null);
+        return accountLogicService.findById(id);
     }
 
     @PutMapping("/Accounts/{id}")
     Account replaceAccount(@RequestBody Account account, @PathVariable Long id) {
-        return accountRepository.findById(id)
-                .map(Account -> accountRepository.save(Account))
-                .orElseGet(() -> {
-                    account.setId(id);
-                    return accountRepository.save(account);
-                });
+        return accountLogicService.replace(account,id);
     }
 
     @DeleteMapping("/user/{id}")
     void deleteUser(@PathVariable Long id) {
-        accountRepository.deleteById(id);
+        accountLogicService.delete(id);
     }
 }

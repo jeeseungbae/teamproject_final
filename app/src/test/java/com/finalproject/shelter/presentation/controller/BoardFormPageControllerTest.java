@@ -6,7 +6,7 @@ import com.finalproject.shelter.domain.model.entity.noticationDomain.Board;
 import com.finalproject.shelter.domain.repository.AccountRepository;
 import com.finalproject.shelter.domain.repository.BoardRepository;
 import com.finalproject.shelter.business.service.account.AccountService;
-import com.finalproject.shelter.business.service.logic.boardlogic.BoardLogicService;
+import com.finalproject.shelter.business.service.logic.BoardLogicService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ public class BoardFormPageControllerTest extends ShelterApplicationTests {
     public void writeview() throws Exception {
 
         Board board = boardLogicService.readCategory("1");
-        Board board1 = boardLogicService.newuserboard(board,accountRepository);
+        Board board1 = boardLogicService.newuserboard(board);
 
         mockMvc.perform(get("/board/form?name=write&categoryid=1"))
                 .andExpect(status().is2xxSuccessful())

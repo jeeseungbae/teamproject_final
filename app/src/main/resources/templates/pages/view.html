@@ -45,7 +45,7 @@
                 <a href="" th:href="@{/board(id=${eachboard.category.id})}" class="btn_bbs">글목록</a>
                 <a></a>
                 <span th:if="${eachboard.nickname}==${Answer.nickname}">
-                    <a href="" th:href="@{/board/form(boardid=${eachboard.id},name=modify)}" class="btn_bbs">수정하기</a>
+                    <a href="" th:href="@{/board/form/modify(boardid=${eachboard.id}}" class="btn_bbs">수정하기</a>
                     <a href="" th:href="@{/board/delete(id=${eachboard.id})}" class="btn_bbs">삭제하기</a>
                 </span>
             </p>

@@ -1,7 +1,7 @@
 package com.finalproject.shelter.presentation.controller.view.board;
 
 import com.finalproject.shelter.domain.model.entity.noticationDomain.Board;
-import com.finalproject.shelter.business.service.logic.boardlogic.BoardLogicService;
+import com.finalproject.shelter.business.service.logic.BoardLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,30 +27,29 @@ public class BoardPageController {
                              @RequestParam(value = "searchText", required = false, defaultValue = "") String searchText,
                              Model model
     ) {
-        Page<Board> boardlist = boardLogicService.findCategoryIdTitleContents(id, select, searchText, pageable);
-        List<Board> weekview = boardLogicService.bestweekview(id);
-        List<Board> monthview = boardLogicService.bestmonthview(id);
-        Board eachboard = boardLogicService.readCategory(id);
+        Page<Board> boards = boardLogicService.findCategoryIdTitleContents(id, select, searchText, pageable);
+        model.addAttribute("boards", boards);
 
-        int startPage = Math.max(1, boardlist.getPageable().getPageNumber() - 4);
-        int endPage = Math.min(boardlist.getTotalPages(), boardlist.getPageable().getPageNumber() + 4);
+        modelAdd(boardLogicService.readCategory(id),model,"eachboard");
+        modelAdd(Math.max(1, boards.getPageable().getPageNumber() - 4),model,"startPage");
+        modelAdd(Math.min(boards.getTotalPages(), boards.getPageable().getPageNumber() + 4),model,"endPage");
 
-        model.addAttribute("boardlist", boardlist);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("eachboard", eachboard);
-        model.addAttribute("weekview", weekview);
-        model.addAttribute("monthview", monthview);
+        modelAdds(boardLogicService.bestweekview(id),model,"weekview");
+        modelAdds(boardLogicService.bestmonthview(id),model,"mothview");
+
         return "pages/list";
     }
 
     @GetMapping("/delete")
     public String deleteboard(@RequestParam(value = "id") String ids) {
-        String id = boardLogicService.deleteid(ids);
-        if (id != "null") {
-            return "redirect:/board?id=" + id + "&page=0";
-        } else {
-            return "redirect:/main";
-        }
+        boardLogicService.deleteid(ids);
+        return "redirect:/main";
+    }
+
+    private void modelAdd(Object obj, Model model, String str){
+        model.addAttribute(str,obj);
+    }
+    private void modelAdds(List<?> objs, Model model, String str){
+        model.addAttribute(str,objs);
     }
 }

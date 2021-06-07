@@ -4,7 +4,7 @@ import com.finalproject.shelter.ShelterApplicationTests;
 import com.finalproject.shelter.domain.model.entity.noticationDomain.Answer;
 import com.finalproject.shelter.domain.repository.AnswerRepository;
 import com.finalproject.shelter.domain.repository.BoardRepository;
-import com.finalproject.shelter.business.service.logic.answerLogic.AnswerLogicService;
+import com.finalproject.shelter.business.service.logic.AnswerLogicService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

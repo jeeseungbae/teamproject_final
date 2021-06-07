@@ -1,4 +1,4 @@
-package com.finalproject.shelter.business.service.logic.boardlogic;
+package com.finalproject.shelter.business.service.logic;
 
 import com.finalproject.shelter.domain.model.entity.noticationDomain.Answer;
 import com.finalproject.shelter.domain.model.entity.noticationDomain.Board;
@@ -34,6 +34,10 @@ public class BoardLogicService {
 
     @Autowired
     private AnswerRepository answerRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
     private Board newboard;
     private Long ids;
     private Board board1;
@@ -88,7 +92,7 @@ public class BoardLogicService {
         });
         return board1;
     }
-    public Board newuserboard(Board board, AccountRepository accountRepository){
+    public Board newuserboard(Board board){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();

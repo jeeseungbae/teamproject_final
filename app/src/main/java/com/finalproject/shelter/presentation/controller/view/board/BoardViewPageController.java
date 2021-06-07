@@ -2,9 +2,8 @@ package com.finalproject.shelter.presentation.controller.view.board;
 
 import com.finalproject.shelter.domain.model.entity.noticationDomain.Answer;
 import com.finalproject.shelter.domain.model.entity.noticationDomain.Board;
-import com.finalproject.shelter.domain.repository.AccountRepository;
-import com.finalproject.shelter.business.service.logic.answerLogic.AnswerLogicService;
-import com.finalproject.shelter.business.service.logic.boardlogic.BoardLogicService;
+import com.finalproject.shelter.business.service.logic.AnswerLogicService;
+import com.finalproject.shelter.business.service.logic.BoardLogicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,46 +16,40 @@ import java.util.List;
 @Controller
 @RequestMapping("/board/view")
 public class BoardViewPageController {
-
     @Autowired
     private BoardLogicService boardLogicService;
     @Autowired
     private AnswerLogicService answerLogicService;
-    @Autowired
-    private AccountRepository accountRepository;
 
     @GetMapping("")
-    public String view(
+    public String listview(
             @RequestParam(value = "id", required = false, defaultValue = "0") String id,
             Model model) {
-        Board eachboard = boardLogicService.readBoardview(id);
-        List<Answer> answerList = answerLogicService.readAnswer(id);
-        List<Board> weekview = boardLogicService.bestweekview(String.valueOf(eachboard.getCategory().getId()));
-        List<Board> monthview = boardLogicService.bestmonthview(String.valueOf(eachboard.getCategory().getId()));
-        Answer answer = answerLogicService.writeuserinfo(eachboard, accountRepository);
+        Board eachBoard = boardLogicService.readBoardview(id);
 
-        model.addAttribute("eachboard", eachboard);
-        model.addAttribute("Answer", answer);
-        model.addAttribute("Answers", answerList);
-        model.addAttribute("weekview", weekview);
-        model.addAttribute("monthview", monthview);
+        modelAdd(eachBoard, model,"Answer");
+        modelAdd(answerLogicService.readUser(eachBoard), model,"eachboard");
+
+        modelAdds(answerLogicService.readAnswer(id),model,"Answers");
+        modelAdds(boardLogicService.bestweekview(getCategoryId(eachBoard)),model,"weekview");
+        modelAdds(boardLogicService.bestmonthview(getCategoryId(eachBoard)),model,"monthview");
+
 
         return "pages/view";
     }
-
     @PostMapping("/answer")
-    public String saveAnswer(@Valid Answer answer, BindingResult bindingResult, Model model) {
+    public String postAnswer(@Valid Answer answer, BindingResult bindingResult, Model model) {
         String id = String.valueOf(answer.getBoard().getId());
         if (bindingResult.hasErrors()) {
-            model.addAttribute("eachboard", answer.getBoard());
-            model.addAttribute("Answer", answer);
-            model.addAttribute("Answers", answerLogicService.readAnswer(id));
+            modelAdd(answer.getBoard(),model,"eachboard");
+            modelAdd(answer,model,"Answer");
+
+            modelAdds(answerLogicService.readAnswer(id),model,"Answers");
             return "pages/view";
         }
         Answer answer1 = answerLogicService.save(answer);
         return "redirect:/board/view?id=" + answer1.getBoard().getId();
     }
-
     @GetMapping("/answer/delete")
     public String deleteAnswer(
             @RequestParam(value = "id", required = false, defaultValue = "0") String id,
@@ -65,5 +58,15 @@ public class BoardViewPageController {
         return "redirect:/board/view?id=" + boardid;
     }
 
-}
+    private String getCategoryId(Board board){
+        String categoryId = String.valueOf(board.getCategory().getId());
+        return categoryId;
+    }
 
+    private void modelAdd(Object obj, Model model, String str){
+        model.addAttribute(str,obj);
+    }
+    private void modelAdds(List<?> objs, Model model, String str){
+        model.addAttribute(str,objs);
+    }
+}
