@@ -47,57 +47,52 @@ public class BoardLogicService {
         this.accountRepository = accountRepository;
     }
 
-    public Page<Board> findTitle(SearchData searchData) {
+    public Page<Board> findTitle(SearchData searchData){
         return boardRepository.findBoardByCategoryIdAndTitleContainingAndContentsContainingOrderByRegisteredAtDescIdDesc
-                (searchData.getId(), searchData.getSearchText(), "", searchData.getPageable());
+                (searchData.getId(),searchData.getSearchText(),"",searchData.getPageable());
     }
-
-    public Page<Board> findContents(SearchData searchData) {
+    public Page<Board> findContents(SearchData searchData){
         return boardRepository.findBoardByCategoryIdAndTitleContainingAndContentsContainingOrderByRegisteredAtDescIdDesc
-                (searchData.getId(), "", searchData.getSearchText(), searchData.getPageable());
+                (searchData.getId(),"",searchData.getSearchText(),searchData.getPageable());
+    }
+    public Page<Board> findCategorys(String id, Pageable pageable){
+        return boardRepository.findBoardByCategoryId(Long.parseLong(id),pageable);
     }
 
-    public Page<Board> findCategorys(String id, Pageable pageable) {
-        return boardRepository.findBoardByCategoryId(Long.parseLong(id), pageable);
-    }
-
-    public Board readCategory(String id) {
+    public Board readCategory(String id){
 
         List<Board> board = boardRepository.findBoardByCategoryId(Long.parseLong(id));
         board1 = Board.builder().build();
 
-        if (board.isEmpty()) {
+        if(board.isEmpty()){
             Optional<Category> category1 = categoryRepository.findById(Long.parseLong(id));
-            if (category1.isPresent()) {
+            if (category1.isPresent()){
                 log.info("new board");
-                category1.ifPresent(select -> {
+                category1.ifPresent(select->{
                     board1.setCategory(select);
-                });
-            } else {
+            });}else{
                 log.error("category is empty");
                 return null;
             }
-        } else {
+        }else {
             log.info("old board");
-            board1 = board.get(0);
+            board1= board.get(0);
         }
         return board1;
     }
-
-    public Board readBoard(String id) {
+    public Board readBoard(String id){
         Optional<Board> board = boardRepository.findBoardById(Long.parseLong(id));
-        if (board.isEmpty()) {
+        if (board.isEmpty()){
             log.error("id is empty");
-            board1 = Board.builder()
+            board1=Board.builder()
                     .build();
         }
-        board.ifPresent(select -> {
+        board.ifPresent(select->{
             board1 = select;
         });
         return board1;
     }
-
-    public Board newUserBoard(Category category) {
+    public Board newUserBoard(Category category){
         Account account = accountRepository.findByUsername(userName());
 
         Board board1 = Board.builder()
@@ -108,87 +103,82 @@ public class BoardLogicService {
 
         return board1;
     }
-
-    private String userName() {
+    private String userName(){
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         return authentication.getName();
     }
 
-    public Board readBoardview(String id) {
+    public Board readBoardview(String id){
         Optional<Board> board = boardRepository.findBoardById(Long.parseLong(id));
-        if (board.isEmpty()) {
+        if (board.isEmpty()){
             log.error("board is empty");
-            board1 = Board.builder().build();
+            board1=Board.builder().build();
         }
-        board.ifPresent(select -> {
-            select.setViewBoard(select.getViewBoard() + 1);
+        board.ifPresent(select->{
+            select.setViewBoard(select.getViewBoard()+1);
             board1 = boardRepository.save(select);
             String REGEX = "\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 
             Pattern pattern = Pattern.compile(REGEX);
             Matcher matcher = pattern.matcher(select.getContents());
             while (matcher.find()) {
-                select.setContents(select.getContents().replace(matcher.group(), "<a style='color:skyblue' href=" + matcher.group() + ">" + matcher.group() + "</a>"));
+                select.setContents(select.getContents().replace(matcher.group(),"<a style='color:skyblue' href="+matcher.group()+">"+matcher.group()+"</a>"));
             }
         });
         return board1;
     }
-
-    public List<Board> bestWeekView(Long id) {
+    public List<Board> bestWeekView(Long id){
         List<Board> weekview = boardRepository.findTop5ByCategoryIdAndRegisteredAtBetweenOrderByViewBoardDesc
-                (id, LocalDate.now().minusDays(7), LocalDate.now());
-        if (weekview != null) {
+                (id, LocalDate.now().minusDays(7),LocalDate.now());
+        if (weekview!=null){
             return weekview;
-        } else {
+        }else {
             log.error("week data is empty");
             return null;
         }
     }
-
-    public List<Board> bestMonthView(Long id) {
+    public List<Board> bestMonthView(Long id){
         List<Board> monthview = boardRepository.findTop5ByCategoryIdAndRegisteredAtBetweenOrderByViewBoardDesc
-                (id, LocalDate.now().minusMonths(1), LocalDate.now());
-        if (monthview != null) {
+                (id, LocalDate.now().minusMonths(1),LocalDate.now());
+        if (monthview!=null){
             return monthview;
-        } else {
+        }else {
             log.error("month data is empty");
             return null;
         }
     }
-
-    public String deleteid(String id) {
+    public String deleteid(String id){
         Optional<Board> board = boardRepository.findBoardById(Long.parseLong(id));
-        if (board.isEmpty()) {
+        if (board.isEmpty()){
             log.error("board is empty");
-            ids = null;
+            ids=null;
         }
-        board.ifPresent(select -> {
+        board.ifPresent(select->{
             newboard = select;
             ids = select.getCategory().getId();
             boardRepository.delete(select);
             List<Answer> answer = answerRepository.findAnswerByBoardId(newboard.getId());
-            if (answer != null) {
-                answer.stream().forEach(select1 -> {
+            if (answer!=null){
+                answer.stream().forEach(select1->{
                     answerRepository.delete(select1);
                 });
             }
         });
         return String.valueOf(ids);
     }
-
-    public Board postservice(Board board) {
+    public Board postservice(Board board){
         Optional<Board> postboard = boardRepository.findBoardById(board.getId());
         String regex = "<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>";
-        String tagRemove = board.getContents().replaceAll(regex, "(<> 안에 한글만 사용할수 있습니다!)");
+        String tagRemove=board.getContents().replaceAll(regex, "(<> 안에 한글만 사용할수 있습니다!)");
         board.setContents(tagRemove);
-        postboard.ifPresent(select -> {
+        postboard.ifPresent(select->{
             log.info("modify");
             select.setTitle(board.getTitle())
                     .setContents(board.getContents());
             newboard = boardRepository.save(select);
         });
-        if (postboard.isEmpty()) {
+        if (postboard.isEmpty()){
             log.info("new board write");
             Board selectboard = board;
             selectboard.setNickname(board.getUser()
